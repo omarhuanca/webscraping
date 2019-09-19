@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+<meta charset="utf-8"></meta>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+<meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+
+<title>Web Scraper Service</title>
+
+</head>
+
+<body class="login">
+	<div>
+		<a class="hiddenanchor" id="signup"></a> <a class="hiddenanchor"
+			id="signin"></a>
+
+		<div class="login_wrapper">
+			<div class="animate form login_form">
+				<section class="login_content" style="text-shadow: none;">
+
+					<form role="form" th:action="@{index}" method="post">
+
+						<h3>Summary of all links on a page</h3>
+
+						<th:block th:if="${param.message}">
+							<div class="alert alert-info alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert"
+									aria-hidden="true">&times;</button>
+								<span><strong th:text="${param.message[0]}">message</strong></span>
+							</div>
+						</th:block>
+						<div>
+							<input id="url" name="url" placeholder="Enter url..." type="url"
+								class="form-control" required="required" />
+						</div>
+						<br /> <br />
+						<div>
+							<button type="button" class="btn btn-dark"
+								onclick="getLink();">Get links</button>
+							<button type="button" class="btn btn-dark"
+									onclick="getImage();">Get Images</button>
+							<button type="button" class="btn btn-dark"
+									onclick="getImport();">Get Imports</button>
+						</div>
+
+						<div class="clearfix"></div>
+
+						<div class="separator">
+							<div id="responseLink">
+								<th:block th:if="${pageSummary}">
+									<div class="block">
+										<div class="block_content">
+											<h2 class="title">
+												<strong>Summary Link</strong>
+											</h2>
+											<div>
+												<ul style="text-align: left;">
+													<li th:each="link : ${pageSummary}">
+														<a th:href="${'http://' + link.key}" th:text="${link.key + ' - ' + link.value}" target="_blank"></a>
+														<!--span>th:text="${link.key}"</span-->
+
+														<!--img th:src="${link.key}"-->
+														<!--span>th:text="${link.key}"</span-->
+
+														<!--span>th:text="${link.key}"</span-->
+													</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</th:block>
+
+							</div>
+							<div id="responseImage">
+								<th:block th:if="${pageSummary}">
+									<div class="block">
+										<div class="block_content">
+											<h2 class="title">
+												<strong>Summary Image</strong>
+											</h2>
+											<div>
+												<ul style="text-align: left;">
+													<li th:each="link : ${pageSummary}">
+														<img th:src="${link.key}">
+														<span>th:text="${link.key}"</span>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</th:block>
+							</div>
+							<div id="responseImport">
+								<th:block th:if="${pageSummary}">
+									<div class="block">
+										<div class="block_content">
+											<h2 class="title">
+												<strong>Summary Import</strong>
+											</h2>
+											<div>
+												<ul style="text-align: left;">
+													<li th:each="link : ${pageSummary}">
+														<span>th:text="${link.key}"</span>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</th:block>
+							</div>
+							<div class="clearfix"></div>
+							<br />
+						</div>
+					</form>
+				</section>
+			</div>
+		</div>
+	</div>
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script type="text/javascript">
+		function getLink() {
+			$("#responseImage").empty();
+			$("#responseImport").empty();
+
+			$("#responseLink").empty();
+			$("#responseLink")
+					.append(
+							'<div class="block"><div class="block_content"><h2 class="title" style="text-align: center;"><strong><a>Requesting Summary...</a></strong></h2></div></div>');
+			$
+					.getJSON(
+							"getlinks",
+							{
+								url : $('#url').val()
+							},
+							function(data) {
+								$("#responseImage").empty();
+								$("#responseImport").empty();
+
+
+								$("#responseLink").empty();
+								$("#responseLink")
+										.append(
+												'<div class="block"><div class="block_content"><h2 class="title"><strong>Summary Link</strong></h2><div><ul id="statsDivLink"></ul></div></div></div>');
+								$
+										.each(
+												data,
+												function(key, val) {
+													$("#statsDivLink")
+															.append(
+																	'<li style="text-align: left;">'
+																			+ '<a href="http://' + key + '" target="_blank">'
+																			+ key
+																			+ '</a>'
+
+																			// + '<span>'
+																			// + key
+																			// + '</span>'
+
+																			// + '<img src="'
+																			// + key
+																			// + '">'
+																			// + '<span>'
+																			// + key
+																			// + '</span>'
+
+																			// + '<span>'
+																			// + key
+																			// + '</span>'
+
+																			+ " - "
+																			+ val
+																			+ '</li>');
+												})
+							})
+					.fail(
+							function(jqxhr, textStatus, error) {
+								$("#responseLink").empty();
+								$("#responseLink")
+										.append(
+												'<div class="block"><div class="block_content"><h2 class="title" style="text-align: center;"><strong>Malformed or Invalid URL: ' + $('#url').val() + '</strong></h2></div></div>');
+							});
+		}
+
+		function getImage() {
+			$("#responseLink").empty();
+			$("#responseImport").empty();
+
+			$("#responseImage").empty();
+			$("#responseImage")
+					.append(
+							'<div class="block"><div class="block_content"><h2 class="title" style="text-align: center;"><strong><a>Requesting Summary...</a></strong></h2></div></div>');
+			$
+					.getJSON(
+							"getimages",
+							{
+								url : $('#url').val()
+							},
+							function(data) {
+								$("#responseLink").empty();
+								$("#responseImport").empty();
+
+								$("#responseImage").empty();
+								$("#responseImage")
+										.append(
+												'<div class="block"><div class="block_content"><h2 class="title"><strong>Summary Image</strong></h2><div><ul id="statsDivImage"></ul></div></div></div>');
+								$
+										.each(
+												data,
+												function(key, val) {
+													$("#statsDivImage")
+															.append(
+																	'<li style="text-align: left;">'
+																			+ '<img src="'
+																			+ key
+																			+ '">'
+																			+ '<span>'
+																			+ key
+																			+ '</span>'
+																			+ " - "
+																			+ val
+																			+ '</li>');
+												})
+							})
+					.fail(
+							function(jqxhr, textStatus, error) {
+								$("#responseImage").empty();
+								$("#responseImage")
+										.append(
+												'<div class="block"><div class="block_content"><h2 class="title" style="text-align: center;"><strong>Malformed or Invalid URL: ' + $('#url').val() + '</strong></h2></div></div>');
+							});
+		}
+
+		function getImport() {
+			$("#responseLink").empty();
+			$("#responseImage").empty();
+
+			$("#responseImport").empty();
+			$("#responseImport")
+					.append(
+							'<div class="block"><div class="block_content"><h2 class="title" style="text-align: center;"><strong><a>Requesting Summary...</a></strong></h2></div></div>');
+			$
+					.getJSON(
+							"getimports",
+							{
+								url : $('#url').val()
+							},
+							function(data) {
+								$("#responseLink").empty();
+								$("#responseImage").empty();
+
+								$("#responseImport").empty();
+								$("#responseImport")
+										.append(
+												'<div class="block"><div class="block_content"><h2 class="title"><strong>Summary Import</strong></h2><div><ul id="statsDivImport"></ul></div></div></div>');
+								$
+										.each(
+												data,
+												function(key, val) {
+													$("#statsDivImport")
+															.append(
+																	'<li style="text-align: left;">'
+																			+ '<span>'
+																			+ key
+																			+ '</span>'
+																			+ " - "
+																			+ val
+																			+ '</li>');
+												})
+							})
+					.fail(
+							function(jqxhr, textStatus, error) {
+								$("#responseImport").empty();
+								$("#responseImport")
+										.append(
+												'<div class="block"><div class="block_content"><h2 class="title" style="text-align: center;"><strong>Malformed or Invalid URL: ' + $('#url').val() + '</strong></h2></div></div>');
+							});
+		}
+	</script>
+</body>
+</html>

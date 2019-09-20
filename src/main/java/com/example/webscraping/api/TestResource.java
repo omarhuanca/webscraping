@@ -3,11 +3,20 @@ package com.example.webscraping.api;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.example.webscraping.service.TestService;
 import com.example.webscraping.util.AElog;
+import com.example.webscraping.util.AEutil;
 
 /**
  * TestResource
@@ -29,27 +39,63 @@ public class TestResource {
     private static final Logger logger = LoggerFactory.getLogger(TestResource.class);
 
     @Autowired
+    private AEutil AEUtil;
+
+    @Autowired
     private TestService testService;
 
-    @RequestMapping(value = { "/getlinks" }, method = { RequestMethod.GET, RequestMethod.POST})
-    public Map<String, Long> getLinks(@RequestParam(value = "url") String url) throws IOException {
-        this.requestLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
+    @GetMapping("/getlinks")
+    public Map<String, Long> getLinks(@Valid @RequestParam(value = "url") String url) throws IOException {
+        this.writeLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
         return testService.getLinkOnPage(url);
     }
 
-    @RequestMapping(value = {"/getimages"}, method = { RequestMethod.GET, RequestMethod.POST })
-    public Map<String, Long> getImages(@RequestParam(value = "url") String url) throws IOException {
-        this.requestLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
+    @GetMapping("/getimages")
+    public Map<String, Long> getImages(@NotEmpty @RequestParam(value = "url") String url) throws IOException {
+        this.writeLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
         return testService.getImageOnPage(url);
     }
 
-    @RequestMapping(value = {"/getimports"}, method = { RequestMethod.GET, RequestMethod.POST })
-    public Map<String, Long> getImports(@RequestParam(value = "url") String url) throws IOException {
-        this.requestLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
+    @GetMapping("/getimports")
+    public Map<String, Long> getImports(@NotNull @RequestParam(value = "url") String url) throws IOException {
+        this.writeLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
         return testService.getImportOnPage(url);
     }
 
-    private synchronized void requestLog(String string) {
+    @PostMapping("/tryLogin")
+    public ResponseEntity<Object> tryLogin(@RequestParam(value = "url") String url,
+            @RequestParam(value = "userAgent") String userAgent, @RequestParam(value = "username") String username,
+            @RequestParam(value = "password") String password, HttpServletRequest request) {
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        testService.tryLogin(url, userAgent, username, password);
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(responseHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/getHtmlDocument")
+    public ResponseEntity<Object> getHtmlDocument(HttpServletRequest request) {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        String baseUrl = "https://portal.dgr.gub.uy";
+        String urlLogin = "https://www.dgr.gub.uy/sr/loginStart.jsf";
+        Document object = testService.getHtmlDocument(baseUrl, urlLogin);
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
+    }
+
+    private synchronized void writeLog(String string) {
         AElog.info1(logger, string);
+    }
+
+    private synchronized void requestLog(HttpServletRequest request) {
+        AElog.info1(logger,
+                AEUtil.getInetAddressPort() + " <= " + request.getRemoteHost() + " {method:" + request.getMethod()
+                        + ", URI:" + request.getRequestURI() + ", query:" + request.getQueryString() + "}");
     }
 }

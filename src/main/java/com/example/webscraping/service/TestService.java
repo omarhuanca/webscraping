@@ -14,17 +14,28 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
 import com.example.webscraping.util.AElog;
+import com.example.webscraping.util.Util;
 
+/**
+ * TestService
+ *
+ * @author Omar Huanca
+ * @since 1.0
+ */
 @Service
 @Slf4j
 public class TestService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestService.class);
+
+    @Autowired
+    private Util util;
 
     public Map<String, Long> getLinkOnPage(String url) throws IOException {
 
@@ -51,7 +62,6 @@ public class TestService {
         return this.convertListToMap(list);
     }
 
-
     private Map<String, Long> convertListToMap(List<String> linksOnPage) {
 
         this.requestLog("List of HostNames recieved");
@@ -59,8 +69,7 @@ public class TestService {
         this.requestLog("Grouping identical HostNames and counting");
         this.requestLog("Creating a Map with unique HostNames as key and their frequencies as values");
 
-        Map<String, Long> mapLinkOnPage = linksOnPage.parallelStream()
-                .filter(link -> (link != null && !link.isEmpty()))
+        Map<String, Long> mapLinkOnPage = linksOnPage.parallelStream().filter(link -> (link != null && !link.isEmpty()))
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         return mapLinkOnPage;
@@ -143,6 +152,30 @@ public class TestService {
         });
 
         return listImport;
+    }
+
+    public void tryLogin(String url, String userAgent, String username, String password) {
+        /*
+         * String url = "https://www.dgr.gub.uy/sr/loginStart.jsf"; 
+         * String userAgent =
+         * "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/75.0.3770.90 Chrome/75.0.3770.90 Safari/537.36"
+         * String username = "6551990"; String password = "VNZANU";
+         */
+        try {
+            util.login(url, userAgent, username, password);
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+    }
+
+    public Document getHtmlDocument(String baseUrl, String urlLogin) {
+        Document response = null;
+        try {
+            response = util.getHtmlDocument(baseUrl, urlLogin);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return response;
     }
 
     private synchronized void requestLog(String string) {

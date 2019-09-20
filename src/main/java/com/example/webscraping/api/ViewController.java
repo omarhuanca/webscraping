@@ -7,8 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import com.example.webscraping.service.TestService;
 import com.example.webscraping.util.AElog;
 
+/**
+ * ViewController
+ *
+ * @author Omar Huanca
+ * @since 1.0
+ */
 @Controller
 @Slf4j
 public class ViewController {
@@ -25,19 +30,19 @@ public class ViewController {
     @Autowired
     private TestService testService;
 
-    @RequestMapping(value = {"index"}, method = RequestMethod.POST)
+    @PostMapping("/index")
     public String postIndexPage(@RequestParam(value = "url") String url, Model model) throws IOException {
 
-        this.requestLog("POST Request to Index.html with url : {}" + url);
+        this.writeLog("POST Request to Index.html with url : {}" + url);
 
         model.addAttribute("pageSummary", testService.getLinkOnPage(url));
 
-        this.requestLog("Rendering Page");
+        this.writeLog("Rendering Page");
 
         return "index";
     }
 
-    private synchronized void requestLog(String string) {
+    private synchronized void writeLog(String string) {
         AElog.info1(logger, string);
     }
 }

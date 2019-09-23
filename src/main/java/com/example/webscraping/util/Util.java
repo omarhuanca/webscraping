@@ -75,7 +75,7 @@ public class Util {
 
             Map<String, String> cookies = response.cookies();
 
-            header.put("Cookie", "_emp_filtros_session=" + cookies.get("_emp_filtros_session"));
+            header.put("Cookie", "JSESSIONID=" + cookies.get("JSESSIONID"));
             header.put("Origin", baseUrl);
             header.put("Referer", urlLogin);
 
@@ -100,7 +100,7 @@ public class Util {
     private Map<String, String> getHeader() {
         Map<String, String> header = new HashMap<>();
 
-        header.put("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
+        header.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
         header.put("Accept-Encoding", "gzip, deflate");
         header.put("Accept-Language", "en-US,en;q=0.9");
         header.put("Cache-Control", "max-age=0");
@@ -111,7 +111,7 @@ public class Util {
         header.put("Origin", "https://www.dgr.gub.uy");
         header.put("Referer", "https://www.dgr.gub.uy");
         header.put("Upgrade-Insecure-Requests", "1");
-        header.put("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/75.0.3770.90 Chrome/75.0.3770.90 Safari/537.36");
+        header.put("User-Agent", "Mozilla/5.0");
 
         return header;
     }

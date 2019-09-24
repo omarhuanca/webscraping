@@ -7,6 +7,7 @@ import java.util.Map;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
 /**
@@ -66,12 +67,14 @@ public class Util {
         Connection.Response response;
 
         try {
-            Map<String, String> header = this.getHeader();
+            Map<String, String> header = getHeader();
             Connection connection = Jsoup.connect(baseUrl)
                                         .headers(header)
                                         .method(Connection.Method.GET);
 
             response = connection.execute();
+
+            System.out.println("response " + response);
 
             Map<String, String> cookies = response.cookies();
 
@@ -109,11 +112,35 @@ public class Util {
         header.put("Content-Type", "application/x-www-form-urlencoded");
         header.put("Host", "www.dgr.gub.uy");
         header.put("Origin", "https://www.dgr.gub.uy");
-        header.put("Referer", "https://www.dgr.gub.uy");
+        header.put("Referer", "https://www.dgr.gub.uy/sr/loginStart.jsf");
         header.put("Upgrade-Insecure-Requests", "1");
         header.put("User-Agent", "Mozilla/5.0");
 
         return header;
     }
 
+    public Map<String, String> getCookie(String defaultUrl, String email, String pass) throws Exception {
+        Map<String, String> cookies = new HashMap<String, String>();
+        String url = "";
+
+        Connection.Response connection = null;
+        connection = Jsoup.connect(defaultUrl).execute();
+        Document doc = connection.parse();
+        Element form = doc.getElementsByTag("form").get(0);
+
+        url = form.attr("action");
+
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("email", email);
+        data.put("pass", pass);
+        connection = Jsoup.connect(url).data(data).execute();
+
+        try {
+            cookies = connection.cookies();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Bad login or password");
+        }
+
+        return cookies;
+    }
 }

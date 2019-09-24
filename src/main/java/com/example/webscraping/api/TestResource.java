@@ -35,34 +35,33 @@ import com.example.webscraping.util.AEutil;
 @RestController
 @Slf4j
 public class TestResource {
-
     private static final Logger logger = LoggerFactory.getLogger(TestResource.class);
 
     @Autowired
-    private AEutil AEUtil;
+    private AEutil util;
 
     @Autowired
     private TestService testService;
 
     @GetMapping("/getlinks")
     public Map<String, Long> getLinks(@Valid @RequestParam(value = "url") String url) throws IOException {
-        this.writeLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
+        System.out.println("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
         return testService.getLinkOnPage(url);
     }
 
     @GetMapping("/getimages")
     public Map<String, Long> getImages(@NotEmpty @RequestParam(value = "url") String url) throws IOException {
-        this.writeLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
+        System.out.println("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
         return testService.getImageOnPage(url);
     }
 
     @GetMapping("/getimports")
     public Map<String, Long> getImports(@NotNull @RequestParam(value = "url") String url) throws IOException {
-        this.writeLog("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
+        System.out.println("Restful Request to the WebScrapingService endpoint with parameter: url = {}" + url);
         return testService.getImportOnPage(url);
     }
 
-    @PostMapping("/tryLogin")
+    @PostMapping("/trylogin")
     public ResponseEntity<Object> tryLogin(@RequestParam(value = "url") String url,
             @RequestParam(value = "userAgent") String userAgent, @RequestParam(value = "username") String username,
             @RequestParam(value = "password") String password, HttpServletRequest request) {
@@ -76,7 +75,7 @@ public class TestResource {
         return new ResponseEntity<Object>(responseHeaders, HttpStatus.OK);
     }
 
-    @GetMapping("/getHtmlDocument")
+    @GetMapping("/gethtmldocument")
     public ResponseEntity<Object> getHtmlDocument(HttpServletRequest request) {
         HttpHeaders responseHeaders = new HttpHeaders();
         requestLog(request);
@@ -89,13 +88,35 @@ public class TestResource {
         return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
     }
 
-    private synchronized void writeLog(String string) {
-        AElog.info1(logger, string);
+    @GetMapping("/getauthvk")
+    public ResponseEntity<Object> getAuthVk(HttpServletRequest request) throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        String baseUrl = "https://m.vk.com";
+        String email = "oma378501@gmail.com";
+        String pass = "Internetes3!";
+        Map<String, String> object = testService.getCookie(baseUrl, email, pass);
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/getcookies")
+    public ResponseEntity<Object> getCookie(@RequestParam(value = "url") String url, @RequestParam(value = "email") String email,
+                                            @RequestParam(value = "password") String password, HttpServletRequest request) throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        Map<String, String> object = testService.getCookie(url, email, password);
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
     }
 
     private synchronized void requestLog(HttpServletRequest request) {
         AElog.info1(logger,
-                AEUtil.getInetAddressPort() + " <= " + request.getRemoteHost() + " {method:" + request.getMethod()
+                util.getInetAddressPort() + " <= " + request.getRemoteHost() + " {method:" + request.getMethod()
                         + ", URI:" + request.getRequestURI() + ", query:" + request.getQueryString() + "}");
     }
 }

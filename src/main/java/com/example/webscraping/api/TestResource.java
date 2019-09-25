@@ -114,6 +114,17 @@ public class TestResource {
         return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
     }
 
+    @GetMapping("/getauthfiltros")
+    public ResponseEntity<Object> getAuthEmporioDeLosFiltros(HttpServletRequest request) throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        Document object = testService.getHtmlDynamicDocument();
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
+    }
+
     private synchronized void requestLog(HttpServletRequest request) {
         AElog.info1(logger,
                 util.getInetAddressPort() + " <= " + request.getRemoteHost() + " {method:" + request.getMethod()

@@ -119,6 +119,72 @@ public class Util {
         return header;
     }
 
+    public Map<String, String> getDynamicHeader() {
+        Map<String, String> header = new HashMap<String, String>();
+
+        header.put("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
+        header.put("Accept-Encoding", "gzip, deflate");
+        header.put("Accept-Language", "en-US,en;q=0.9");
+        header.put("Cache-Control", "max-age=0");
+        header.put("Connection", "keep-alive");
+        header.put("Content-Length", "173");
+        header.put("Content-Type", "application/x-www-form-urlencoded");
+        header.put("Host", "sistema.emporiodelosfiltros.com");
+        header.put("Origin", "http://sistema.emporiodelosfiltros.com");
+        header.put("Referer", "http://sistema.emporiodelosfiltros.com/");
+        header.put("Upgrade-Insecure-Requests", "1");
+        header.put("User-Agent", "Mozilla/5.0");
+
+        return header;
+    }
+
+    public Document getHtmlDynamicDocument() {
+        Document page = null;
+        Connection.Response response;
+
+        try {
+            Map<String, String> header = this.getDynamicHeader();
+            Connection connection = Jsoup.connect("http://sistema.emporiodelosfiltros.com/")
+                    .headers(header)
+                    .method(Connection.Method.GET);
+
+            response = connection.execute();
+            Document document = connection.get();
+
+            Element authenticityToken = document.select("input[name=authenticity_token]").first();
+            if (null == authenticityToken) {
+                System.out.println("Error of token");
+                return null;
+            }
+
+            String authenticityTokenVal = authenticityToken.attr("value");
+
+            Map<String, String> cookies = response.cookies();
+
+            header.put("Cookie", "_emp_filtros_session=" + cookies.get("_emp_filtros_session"));
+            header.put("Origin", "http://sistema.emporiodelosfiltros.com");
+            header.put("Referer", "http://sistema.emporiodelosfiltros.com/usuarios/sign_in?unauthenticated=true");
+
+            response = Jsoup.connect("http://sistema.emporiodelosfiltros.com/usuarios/sign_in")
+                    .data("authenticity_token", authenticityTokenVal)
+                    .data("usuario[email]", "Alsur-repuestos@adinet.com.uy")
+                    .data("usuario[password]", "alsurrepuestos")
+                    .data("commit", "Ingresar")
+                    .cookies(cookies)
+                    .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/75.0.3770.90 Chrome/75.0.3770.90 Safari/537.36")
+                    .method(Connection.Method.POST)
+                    .execute();
+
+            String body = response.body();
+            page = Jsoup.parseBodyFragment(body.substring(body.indexOf("<table>"), body.indexOf("</table>")));
+
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+
+        return page;
+    }
+
     public Map<String, String> getCookie(String defaultUrl, String email, String pass) throws Exception {
         Map<String, String> cookies = new HashMap<String, String>();
         String url = "";

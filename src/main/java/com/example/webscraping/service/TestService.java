@@ -173,4 +173,14 @@ public class TestService {
         }
         return response;
     }
+
+    public Document getHtmlDynamicDocument() {
+        Document response = null;
+        try {
+            response = util.getHtmlDynamicDocument();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
 }

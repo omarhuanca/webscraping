@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ public class TestResource {
         return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
     }
 
-    @GetMapping("/getauthvk")
+    @GetMapping("/getauthvks")
     public ResponseEntity<Object> getAuthVk(HttpServletRequest request) throws Exception {
         HttpHeaders responseHeaders = new HttpHeaders();
         requestLog(request);
@@ -120,6 +121,62 @@ public class TestResource {
         requestLog(request);
 
         Document object = testService.getHtmlDynamicDocument();
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/getdocuments")
+    public ResponseEntity<Object> getDocument(HttpServletRequest request) throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        Document object = testService.getDocument();
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/getdocumentthrees")
+    public ResponseEntity<Object> getDocumentThree(@RequestParam(value = "url") String url, HttpServletRequest request) throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        Map<String, String> object = testService.getDocumentThree(url);
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/getdocumentfours")
+    public ResponseEntity<Object> getDocumentFour(@RequestParam(value = "url") String url, HttpServletRequest request) throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        Connection.Response object = testService.getDocumentFour(url);
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/getdocumentfives")
+    public ResponseEntity<Object> getDocumentFive(@RequestParam(value = "url") String url, @RequestParam(value = "host") String host,
+                                                  HttpServletRequest request) throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        Map<String, String> object = testService.getDocumentFive(url, host);
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
+    }
+
+    @PostMapping("/getdocumentsixs")
+    public ResponseEntity<Object> getDocumentSix(HttpServletRequest request) throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+
+        Document object = testService.getDocumentSix();
 
         responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
         return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);

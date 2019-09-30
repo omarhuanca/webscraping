@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -181,6 +182,67 @@ public class TestService {
         } catch(Exception e) {
             e.printStackTrace();
         }
+        return response;
+    }
+
+    public Document getDocument() {
+        Document response = null;
+        try {
+            //String defaultUrl = "https://www.dgr.gub.uy/sr/loginStart.jsf";
+            String defaultUrl = "http://sistema.emporiodelosfiltros.com/usuarios/sign_in";
+         //String userAgentChromium = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/75.0.3770.90 Chrome/75.0.3770.90 Safari/537.36";
+           //String userAgentChrome = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36";
+            String userAgentFirefox = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:64.0) Gecko/20100101 Firefox/64.0"; 
+            response = util.getDocument(defaultUrl, userAgentFirefox);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
+
+    public Map<String, String> getDocumentThree(String defaultUrl) {
+        Map<String, String> response = null;
+        try {
+            response = util.getDocumentThree(defaultUrl);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+    public Connection.Response getDocumentFour(String defaultUrl) {
+        Connection.Response response = null;
+        try {
+            response = util.getDocumentFour(defaultUrl);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+    public Map<String, String> getDocumentFive(String defaultUrl, String host) {
+        Map<String, String> response = null;
+        try {
+            response = util.getDocumentFive(defaultUrl, host);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+    public Document getDocumentSix() {
+        Document response = null;
+        try {
+            String defaultUrl = "https://www.dgr.gub.uy/sr/loginStart.jsf";
+            String host = "www.dgr.gub.uy";
+            response = util.getDocumentSix(defaultUrl, host);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
         return response;
     }
 }

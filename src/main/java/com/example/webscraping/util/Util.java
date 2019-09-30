@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
+import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
  * @since 1.0
  */
 @Component
+@Slf4j
 public class Util {
 
     public void login(String url, String userAgent, String username, String password) throws IOException {
@@ -103,7 +106,7 @@ public class Util {
     private Map<String, String> getHeader() {
         Map<String, String> header = new HashMap<>();
 
-        header.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        header.put("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
         header.put("Accept-Encoding", "gzip, deflate");
         header.put("Accept-Language", "en-US,en;q=0.9");
         header.put("Cache-Control", "max-age=0");
@@ -209,4 +212,223 @@ public class Util {
 
         return cookies;
     }
+
+    public Document getDocument(String defaultUrl, String userAgent) {
+        Document document = null;
+        try {
+            Map<String, String> header = this.getDynamicHeader();
+            Connection connection = Jsoup.connect(defaultUrl)
+                    .headers(header)
+                    .validateTLSCertificates(false)
+                    .userAgent(userAgent)
+                    .method(Connection.Method.GET);
+
+            Connection.Response response = connection.execute();
+            document = Jsoup.parse(response.body());
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return document;
+    }
+
+    public Map<String, String> getDocumentThree(String defaultUrl) {
+        Map<String, String> cookies = new HashMap<String, String>();
+
+        try {
+            Connection.Response connection = null;
+            connection = Jsoup.connect(defaultUrl)
+                        .validateTLSCertificates(false)
+                        .execute();
+            cookies = connection.cookies();
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return cookies;
+    }
+
+    public Connection.Response getDocumentFour(String defaultUrl) {
+        Connection.Response response = null;
+
+        try {
+            Connection connection = Jsoup.connect(defaultUrl);
+            response = connection.execute();
+
+            Document document = connection.get();
+
+            Map<String, String> cookies = response.cookies();
+
+            System.out.println("cookie: " + cookies.get("JSESSIONID"));
+
+            String userAgentChromium = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/75.0.3770.90 Chrome/75.0.3770.90 Safari/537.36";
+
+            // document.select("input[name=authenticity_token]").first()
+            System.out.println("name=j_username " + document.select("input[name=j_username]"));
+            System.out.println("type=submit " + document.select("input[type=submit]"));
+
+
+            response = Jsoup.connect("https://www.dgr.gub.uy/sr/j_security_check")
+                            .data("j_username", "6551990")
+                            .data("j_password", "VNZANU")
+                            .cookies(this.getRequestHeaderFour(cookies.get("JSESSIONID"), userAgentChromium))
+                            .userAgent(userAgentChromium)
+                            .method(Connection.Method.POST)
+                            .execute();
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+    public Map<String, String> getDocumentFive(String defaultUrl, String host) {
+        Map<String, String> cookies = new HashMap<>();
+        try {
+            Connection.Response response = null;
+
+            Connection connection = Jsoup.connect(defaultUrl)
+                                        .headers(this.getRequestHeaderBefore(host))
+                                        .method(Connection.Method.GET);
+            response = connection.execute();
+
+            cookies = response.cookies();
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return cookies;
+    }
+
+    public Document getDocumentSix(String defaultUrl, String host) {
+            Connection.Response res = null;
+            Document doc = null;
+            Map<String, String> cookies = new HashMap<>();
+            Map<String, String> headers = new HashMap<>();
+        try {
+            headers = this.getRequestHeaderBefore(host);
+            Connection connection = Jsoup.connect(defaultUrl)
+                    .headers(headers)
+                    .method(Connection.Method.GET);
+
+            res = connection.execute();
+            cookies = res.cookies();
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        //Map<String, String> cookiesTwo = new HashMap<>();
+        Connection.Response responseTwo = null;
+        Response homePage = null;
+        try {
+            Connection connectionTwo = null;
+            Map<String, String> headersTwo = new HashMap<>();
+
+            headersTwo = this.getRequestHeaderAfter(cookies.get("JSESSIONID"));
+
+            connectionTwo = Jsoup.connect("https://www.dgr.gub.uy/sr/j_security_check")
+                    .headers(headersTwo)
+                    .data("j_username", "6551990")
+                    .data("j_password", "VNZANU")
+                    .cookies(res.cookies())
+                    .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36")
+                    .referrer(defaultUrl)
+                    .method(Connection.Method.POST);
+
+            responseTwo = connectionTwo.execute();
+
+            //cookiesTwo = responseTwo.cookies();
+
+            homePage = Jsoup.connect(defaultUrl)
+                            .cookies(res.cookies())
+                            .method(Connection.Method.GET)
+                            .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36")
+                            .referrer("https://www.dgr.gub.uy/sr/j_security_check")
+                            .followRedirects(true)
+                            .headers(headersTwo)
+                            .execute();
+                            
+            doc = homePage.parse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return doc;
+    }
+
+    private Map<String, String> getRequestHeaderBefore(String host) {
+        Map<String, String> header = new HashMap<>();
+
+        header.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        header.put("Accept-Encoding", "gzip, deflate");
+        header.put("Accept-Language", "en-US,en;q=0.9");
+        header.put("Cache-Control", "max-age=0");
+        header.put("Connection", "keep-alive");
+        header.put("Host", host);
+        header.put("Upgrade-Insecure-Requests", "1");
+        header.put("User-Agent", "Mozilla/5.0");
+
+        return header;
+    }
+
+    private Map<String, String> getRequestHeaderAfter(String cookie) {
+        Map<String, String> header = new HashMap<>();
+
+        header.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        header.put("Accept-Encoding", "gzip, deflate");
+        header.put("Accept-Language", "en-US,en;q=0.9");
+        header.put("Cache-Control", "max-age=0");
+        header.put("Connection", "keep-alive");
+        header.put("Content-Length", "36");
+        header.put("Content-Type", "application/x-www-form-urlencoded");
+        header.put("Cookie", "JSESSIONID=" + cookie);
+        header.put("Host", "www.dgr.gub.uy");
+        header.put("Origin", "https://www.dgr.gub.uy");
+        header.put("Referer", "https://www.dgr.gub.uy/sr/loginStart.jsf");
+        header.put("Upgrade-Insecure-Requests", "1");
+        header.put("User-Agent", "Mozilla/5.0");
+
+        return header;
+    }
+
+
+    private Map<String, String> getRequestHeaderFour(String cookie, String userAgent) {
+        Map<java.lang.String, java.lang.String> response = new HashMap<>();
+
+        response.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        response.put("Accept-Encoding", "gzip, deflate, br");
+        response.put("Accept-Language", "en-US,en;q=0.9");
+        response.put("Cache-Control", "max-age=0");
+        response.put("Connection", "keep-alive");
+        response.put("Cookie", "JSESSIONID=" + cookie);
+        response.put("Host", "www.dgr.gub.uy");
+        response.put("Referer", "https://www.dgr.gub.uy/sr/loginStart.jsf");
+        response.put("Upgrade-Insecure-Requests", userAgent);
+
+        return response;
+    }
+
+    public Map<String, String> getHeaderFive(String cookie, String userAgent) {
+        Map<String, String> header = new HashMap<String, String>();
+
+        header.put("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
+        header.put("Accept-Encoding", "gzip, deflate");
+        header.put("Accept-Language", "en-US,en;q=0.9");
+        header.put("Cache-Control", "max-age=0");
+        header.put("Connection", "keep-alive");
+        header.put("Cookie", "_emp_filtros_session=" + cookie);
+        header.put("Content-Length", "173");
+        header.put("Content-Type", "application/x-www-form-urlencoded");
+        header.put("Host", "sistema.emporiodelosfiltros.com");
+        header.put("Origin", "http://sistema.emporiodelosfiltros.com");
+        header.put("Referer", "http://sistema.emporiodelosfiltros.com/");
+        header.put("Upgrade-Insecure-Requests", "1");
+        header.put("User-Agent", userAgent);
+
+        return header;
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.example.webscraping.api;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -176,7 +177,7 @@ public class TestResource {
         HttpHeaders responseHeaders = new HttpHeaders();
         requestLog(request);
 
-        Document object = testService.getDocumentSix();
+        List<String> object = testService.getDocumentSix();
 
         responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
         return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);

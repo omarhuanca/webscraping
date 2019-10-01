@@ -233,8 +233,8 @@ public class TestService {
         return response;
     }
 
-    public Document getDocumentSix() {
-        Document response = null;
+    public List<String> getDocumentSix() {
+        List<String> response = null;
         try {
             response = util.getDocumentSix();
         } catch(Exception e) {

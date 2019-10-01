@@ -1,7 +1,10 @@
 package com.example.webscraping.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
@@ -303,7 +306,8 @@ public class Util {
         return cookies;
     }
 
-    public Document getDocumentSix() {
+    public List<String> getDocumentSix() {
+        List<String> listaResult = new ArrayList<>();
         Connection.Response res = null;
         Document doc = null;
         Map<String, String> cookies = new HashMap<>();
@@ -321,7 +325,6 @@ public class Util {
         } catch(Exception e) {
             e.printStackTrace();
         }
-        Connection.Response responseTwo = null;
 
         try {
             Map<String, String> headersTwo = new HashMap<>();
@@ -329,42 +332,47 @@ public class Util {
             headersTwo = this.getRequestHeaderAfter(cookies.get("JSESSIONID"));
 
             Connection connectionTwo = Jsoup.connect("https://www.dgr.gub.uy/sr/j_security_check")
-                    .headers(headersTwo)
+                    //.headers(headersTwo)
                     .data("j_username", "6551990")
                     .data("j_password", "VNZANU")
-                    .data("input[type=submit]", "ingresar")
                     .timeout(2*1000) 
                     .ignoreHttpErrors(true)
                     .cookies(cookies)
                     .method(Connection.Method.POST);
 
-            responseTwo = connectionTwo.execute();
+            res = connectionTwo.execute();
 
             } catch (Exception e) {
             e.printStackTrace();
         }
 
+        
         try {
             Map<String, String> headersThree = new HashMap<>();
-            Connection.Response  responseThree = null;
+            //Connection.Response  responseThree = null;
             Connection connectionThree = null;
 
             headersThree = this.getRequestHeaderAfterLogin(cookies.get("JSESSIONID"));
             connectionThree = Jsoup.connect("http://www.dgr.gub.uy/sr/principal.jsf")
                             .headers(headersThree)
                             .cookies(cookies)
+                            .data("_EventName", "E'LOGIN")
                             .method(Connection.Method.GET)
                             .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36")
                             .followRedirects(true);
 
-            responseThree = connectionThree.execute();
+            res = connectionThree.execute();
 
-            doc = responseThree.parse();
+            doc = res.parse();
+            String[] listaSplit = doc.body().html().split("\n");
+            listaResult = Arrays.asList(listaSplit);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
 
-        return doc;
+        return listaResult;
     }
 
     private Map<String, String> getRequestHeaderBefore() {

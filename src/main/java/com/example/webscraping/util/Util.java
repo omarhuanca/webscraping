@@ -290,7 +290,7 @@ public class Util {
             Connection.Response response = null;
 
             Connection connection = Jsoup.connect(defaultUrl)
-                                        .headers(this.getRequestHeaderBefore(host))
+                                        .headers(this.getRequestHeaderBefore())
                                         .method(Connection.Method.GET);
             response = connection.execute();
 
@@ -303,14 +303,15 @@ public class Util {
         return cookies;
     }
 
-    public Document getDocumentSix(String defaultUrl, String host) {
-            Connection.Response res = null;
-            Document doc = null;
-            Map<String, String> cookies = new HashMap<>();
-            Map<String, String> headers = new HashMap<>();
+    public Document getDocumentSix() {
+        Connection.Response res = null;
+        Document doc = null;
+        Map<String, String> cookies = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
+
         try {
-            headers = this.getRequestHeaderBefore(host);
-            Connection connection = Jsoup.connect(defaultUrl)
+            headers = this.getRequestHeaderBefore();
+            Connection connection = Jsoup.connect("https://www.dgr.gub.uy/sr/loginStart.jsf")
                     .headers(headers)
                     .method(Connection.Method.GET);
 
@@ -320,38 +321,45 @@ public class Util {
         } catch(Exception e) {
             e.printStackTrace();
         }
-        //Map<String, String> cookiesTwo = new HashMap<>();
         Connection.Response responseTwo = null;
-        Response homePage = null;
+
         try {
-            Connection connectionTwo = null;
             Map<String, String> headersTwo = new HashMap<>();
 
             headersTwo = this.getRequestHeaderAfter(cookies.get("JSESSIONID"));
 
-            connectionTwo = Jsoup.connect("https://www.dgr.gub.uy/sr/j_security_check")
+            Connection connectionTwo = Jsoup.connect("https://www.dgr.gub.uy/sr/j_security_check")
                     .headers(headersTwo)
                     .data("j_username", "6551990")
                     .data("j_password", "VNZANU")
-                    .cookies(res.cookies())
-                    .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36")
-                    .referrer(defaultUrl)
+                    .data("input[type=submit]", "ingresar")
+                    .timeout(2*1000) 
+                    .ignoreHttpErrors(true)
+                    .cookies(cookies)
                     .method(Connection.Method.POST);
 
             responseTwo = connectionTwo.execute();
 
-            //cookiesTwo = responseTwo.cookies();
+            } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-            homePage = Jsoup.connect(defaultUrl)
-                            .cookies(res.cookies())
+        try {
+            Map<String, String> headersThree = new HashMap<>();
+            Connection.Response  responseThree = null;
+            Connection connectionThree = null;
+
+            headersThree = this.getRequestHeaderAfterLogin(cookies.get("JSESSIONID"));
+            connectionThree = Jsoup.connect("http://www.dgr.gub.uy/sr/principal.jsf")
+                            .headers(headersThree)
+                            .cookies(cookies)
                             .method(Connection.Method.GET)
                             .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36")
-                            .referrer("https://www.dgr.gub.uy/sr/j_security_check")
-                            .followRedirects(true)
-                            .headers(headersTwo)
-                            .execute();
-                            
-            doc = homePage.parse();
+                            .followRedirects(true);
+
+            responseThree = connectionThree.execute();
+
+            doc = responseThree.parse();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -359,7 +367,7 @@ public class Util {
         return doc;
     }
 
-    private Map<String, String> getRequestHeaderBefore(String host) {
+    private Map<String, String> getRequestHeaderBefore() {
         Map<String, String> header = new HashMap<>();
 
         header.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
@@ -367,7 +375,7 @@ public class Util {
         header.put("Accept-Language", "en-US,en;q=0.9");
         header.put("Cache-Control", "max-age=0");
         header.put("Connection", "keep-alive");
-        header.put("Host", host);
+        header.put("Host", "www.dgr.gub.uy");
         header.put("Upgrade-Insecure-Requests", "1");
         header.put("User-Agent", "Mozilla/5.0");
 
@@ -378,7 +386,7 @@ public class Util {
         Map<String, String> header = new HashMap<>();
 
         header.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
-        header.put("Accept-Encoding", "gzip, deflate");
+        header.put("Accept-Encoding", "gzip, deflate, br");
         header.put("Accept-Language", "en-US,en;q=0.9");
         header.put("Cache-Control", "max-age=0");
         header.put("Connection", "keep-alive");
@@ -389,10 +397,27 @@ public class Util {
         header.put("Origin", "https://www.dgr.gub.uy");
         header.put("Referer", "https://www.dgr.gub.uy/sr/loginStart.jsf");
         header.put("Upgrade-Insecure-Requests", "1");
-        header.put("User-Agent", "Mozilla/5.0");
+        header.put("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/75.0.3770.90 Chrome/75.0.3770.90 Safari/537.36");
 
         return header;
     }
+
+    private Map<String, String> getRequestHeaderAfterLogin(String cookie) {
+        Map<String, String> header = new HashMap<>();
+
+        header.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        header.put("Accept-Encoding", "gzip, deflate");
+        header.put("Accept-Language", "en-US,en;q=0.9");
+        header.put("Cache-Control", "max-age=0");
+        header.put("Connection", "keep-alive");
+        header.put("Cookie", "JSESSIONID=" + cookie);
+        header.put("Host", "www.dgr.gub.uy");
+        header.put("Upgrade-Insecure-Requests", "1");
+        header.put("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/75.0.3770.90 Chrome/75.0.3770.90 Safari/537.36");
+
+        return header;
+    }
+    
 
 
     private Map<String, String> getRequestHeaderFour(String cookie, String userAgent) {

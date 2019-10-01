@@ -236,9 +236,7 @@ public class TestService {
     public Document getDocumentSix() {
         Document response = null;
         try {
-            String defaultUrl = "https://www.dgr.gub.uy/sr/loginStart.jsf";
-            String host = "www.dgr.gub.uy";
-            response = util.getDocumentSix(defaultUrl, host);
+            response = util.getDocumentSix();
         } catch(Exception e) {
             e.printStackTrace();
         }

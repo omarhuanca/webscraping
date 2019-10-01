@@ -171,7 +171,7 @@ public class TestResource {
         return new ResponseEntity<Object>(object, responseHeaders, HttpStatus.OK);
     }
 
-    @PostMapping("/getdocumentsixs")
+    @GetMapping("/getdocumentsixs")
     public ResponseEntity<Object> getDocumentSix(HttpServletRequest request) throws Exception {
         HttpHeaders responseHeaders = new HttpHeaders();
         requestLog(request);

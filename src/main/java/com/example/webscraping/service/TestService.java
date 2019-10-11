@@ -243,4 +243,19 @@ public class TestService {
 
         return response;
     }
+
+    
+    public List<String> getDocumentEight() {
+        Map<String, Object> response = null;
+        List<String> responseTwo = new ArrayList<>();
+        try {
+            responseTwo = util.getDocumentSeven("6551990", "VNZANU");
+            //responseTwo = util.getPhysicalPersonTwo((Map<String, String>) response.get("cookies"), "6551990");
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return responseTwo;
+    }
 }

@@ -77,6 +77,23 @@ public class TestResource {
         return new ResponseEntity<Object>(responseHeaders, HttpStatus.OK);
     }
 
+    @PostMapping("/tryLoginDos")
+    public ResponseEntity<Object> tryLoginDos(HttpServletRequest request) {
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        requestLog(request);
+        
+        String url = "https://tickantel.com.uy/inicio/login?0-1.IFormSubmitListener-loginPanel-loginForm";
+        String userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+        String username = "ohuanca@t2company.com.uy";
+        String password = "Internetes3!";
+
+        testService.tryLoginDos(url, userAgent, username, password);
+
+        responseHeaders.set("Custom-Message", "HTTP/1.1 200 OK");
+        return new ResponseEntity<Object>(responseHeaders, HttpStatus.OK);
+    }
+
     @GetMapping("/gethtmldocument")
     public ResponseEntity<Object> getHtmlDocument(HttpServletRequest request) {
         HttpHeaders responseHeaders = new HttpHeaders();

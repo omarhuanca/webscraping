@@ -55,6 +55,7 @@ public class Util {
             Document document = responsePostLogin.parse();
             System.out.println("Document " + document);
 
+
             Map<String, String> mapLoggedInCookies = responsePostLogin.cookies();
             System.out.println("Cookies " + mapLoggedInCookies);
 
@@ -63,6 +64,33 @@ public class Util {
         }
     }
 
+    public void loginDos(String url, String userAgent, String username, String password) throws IOException {
+        try {
+            Connection.Response loginPageResponse = Jsoup.connect(url).referrer(url).userAgent(userAgent)
+                    .timeout(10 * 1000).followRedirects(true).execute();
+
+            System.out.println("Fetched login page");
+
+            Map<String, String> mapLoginPageCookie = loginPageResponse.cookies();
+
+            Map<String, String> mapParams = new HashMap<String, String>();
+            mapParams.put("loginCamposPanel:correo", username);
+            mapParams.put("loginCamposPanel:password", password);
+
+            Connection.Response responsePostLogin = Jsoup.connect(url).referrer(url).userAgent(userAgent)
+                    .timeout(10 * 1000).data(mapParams).cookies(mapLoginPageCookie).followRedirects(true).execute();
+
+            System.out.println("HTTP Status code " + responsePostLogin);
+
+
+            Map<String, String> mapLoggedInCookies = responsePostLogin.cookies();
+            System.out.println("Cookies " + mapLoggedInCookies);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public Document getHtmlDocument(String baseUrl, String urlLogin) {
         Document page = null;
         Connection.Response response;

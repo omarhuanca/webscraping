@@ -155,6 +155,14 @@ public class TestService {
         }
     }
 
+    public void tryLoginDos(String url, String userAgent, String username, String password) {
+        try {
+            util.loginDos(url, userAgent, username, password);
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+    }
+    
     public Document getHtmlDocument(String baseUrl, String urlLogin) {
         Document response = null;
         try {
